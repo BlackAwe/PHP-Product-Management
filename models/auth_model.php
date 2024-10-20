@@ -7,7 +7,7 @@ global $conn;
 # Function to insert the registered user into the database
 function registerUser($firstname, $lastname, $username, $password, $conn)
 {
-    $hashed_password = password_hash(trim($password), PASSWORD_DEFAULT);
+    $hashed_password = password_hash(trim($password), PASSWORD_DEFAULT); # Password hashing to ensure security
 
     $stmt = $conn->prepare("INSERT INTO users (firstname, lastname, username, password) VALUES (?,?,?,?)");
     $stmt->bind_param("ssss", $firstname, $lastname, $username, $hashed_password);
@@ -21,13 +21,13 @@ function registerUser($firstname, $lastname, $username, $password, $conn)
     $stmt->close();
 }
 
+# Function that handles login logic, verifying the account in the database
 function loginUser($username, $password, $conn)
 {
-    // Variables to hold userId and hashed_password from the database
+    #Variables needed for comparing form values and database contents
     $userId = null;
     $hashed_password = '';
 
-    // Prepare the SQL statement to prevent SQL injection
     $stmt = $conn->prepare("SELECT userId, password FROM users WHERE username = ?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
@@ -37,17 +37,15 @@ function loginUser($username, $password, $conn)
     if ($stmt->num_rows > 0) {
         $stmt->bind_result($userId, $hashed_password);
         $stmt->fetch();
-        if (password_verify($password, $hashed_password)) {
-            // If the password matches, start the session
+        if (password_verify($password, $hashed_password)) { // Password function for ensuring validity
             session_start();
-            $_SESSION['userId'] = $userId; // Store user ID in session
-            $_SESSION['username'] = $username; // Optionally store the username
+            $_SESSION['userId'] = $userId;
+            $_SESSION['username'] = $username;
             return true;
         } else {
             return false;
         }
     }
 
-    // Close the statement
     $stmt->close();
 }

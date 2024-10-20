@@ -5,26 +5,20 @@ include_once '../models/auth_model.php';
 
 session_start();
 
+# Switch case to start managing views
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
     switch ($_POST['action']) {
         case 'register':
-            RegistrationController();
+            RegistrationController(); // navigates to registration page
             break;
         case 'login':
-            LoginController();
+            LoginController(); // navigates to login page
             break;
         default:
             echo "Invalid action";
             break;
     }
 }
-
-
-// &&  $_POST['action'] == 'register') {
-//     RegistrationController();
-// } else if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'login') {
-//     LoginController();
-// }
 
 # Function to manage registration in views
 function RegistrationController()
@@ -47,6 +41,7 @@ function RegistrationController()
     }
 }
 
+# Function for controlling the login navigation
 function LoginController()
 {
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
