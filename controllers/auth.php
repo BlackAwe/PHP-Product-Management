@@ -31,7 +31,7 @@ function RegistrationController()
         $password = $_POST['password'];
 
         if (registerUser($firstname, $lastname, $username, $password, $conn)) {
-            header("Location: ../views/auth/login.php");
+            header("Location: ../views/auth/login.html");
             exit();
         } else {
             echo "Registration failed. Please try again.";
