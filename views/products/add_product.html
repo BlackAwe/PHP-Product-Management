@@ -36,7 +36,8 @@
     <!-- Main Content -->
     <div class="main-content container mt-5">
       <h1 class="mb-4 text-center">Add Product</h1>
-      <form action="add_product.php" method="post">
+      <form action="../../controllers/products.php" method="post">
+        <input type="hidden" name="action" value="create" />
         <div class="mb-3">
           <label for="barcode" class="form-label">Product Barcode</label>
           <input
@@ -53,7 +54,7 @@
             type="text"
             class="form-control"
             id="name"
-            name="name"
+            name="productname"
             required
           />
         </div>
@@ -75,6 +76,9 @@
             class="form-control"
             id="price"
             name="price"
+            min="0"
+            value="0"
+            step=".01"
             required
           />
         </div>
@@ -90,13 +94,14 @@
         </div>
         <div class="mb-3">
           <label for="category" class="form-label">Category</label>
-          <input
-            type="text"
-            class="form-control"
-            id="category"
-            name="category"
-            required
-          />
+          <select name="category" id="category">
+            <option value="food">Food and Beverage</option>
+            <option value="furniture">Furniture</option>
+            <option value="health">Health and wellness</option>
+            <option value="electronics">Electronics</option>
+            <option value="fashion">Fashion</option>
+            <option value="toys">Toys and hobbies</option>
+          </select>
         </div>
         <button type="submit" class="btn btn-primary w-100">Add Product</button>
       </form>
