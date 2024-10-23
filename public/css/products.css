@@ -1,0 +1,273 @@
+/* ===============================
+   GENERAL STYLES AND RESET 
+================================ */
+
+/* Resetting margin and padding */
+* {
+  margin: 0;
+  padding: 0;
+}
+
+/* Utility class for vertically centering content */
+.vertical-center {
+  display: flex;
+  align-items: center;
+  min-height: 100vh;
+}
+
+body {
+  background-color: white; /* Consistent white background */
+  color: #333; /* Dark gray text color */
+  font-family: 'Arial', sans-serif; /* Universal font */
+  overflow-x: hidden; /* Prevent horizontal scrolling on small screens */
+}
+
+/* ===============================
+   SIDEBAR STYLES
+================================ */
+
+/* Sidebar structure and styling */
+.sidebar {
+  height: 100vh;
+  width: 250px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #142e47; /* Navy blue for the sidebar */
+  padding-top: 20px;
+  color: white;
+  transition: width 0.3s ease;
+  z-index: 1000;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for modern effect */
+  overflow-x: hidden; /* Prevents content leaking */
+}
+
+/* Sidebar links */
+.sidebar a {
+  padding: 15px 30px;
+  text-decoration: none;
+  font-size: 18px;
+  color: white;
+  display: block;
+  transition: 0.3s;
+}
+
+/* Sidebar link hover state */
+.sidebar a:hover {
+  background-color: #005bb5; /* Hover effect with consistent blue */
+}
+
+/* Sidebar header */
+.sidebar .sidebar-header {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+/* ===============================
+   MAIN CONTENT STYLES
+================================ */
+
+.main-content {
+  margin-left: 250px;
+  padding: 20px;
+  transition: margin-left 0.3s ease; /* Smooth transition for sidebar collapse */
+}
+
+/* ===============================
+   TYPOGRAPHY STYLES (Headings, etc.)
+================================ */
+
+/* Page headings */
+h1 {
+  margin-bottom: 30px;
+  font-weight: bold;
+  color: #007bff; /* Consistent blue for all headings */
+}
+
+/* ===============================
+   BUTTON AND INTERACTION STYLES
+================================ */
+
+/* General button styles */
+.btn-action {
+  padding: 5px;
+  margin: 0 2px;
+  border: none;
+  transition: transform 0.3s, box-shadow 0.3s;
+  background-color: transparent;
+}
+
+/* Hover effect for action buttons */
+.btn-action:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Delete button styles */
+.btn-danger {
+  background-color: #e34234; /* Red for delete button */
+  border: none;
+}
+
+/* Delete button hover effect */
+.btn-danger:hover {
+  background-color: #e5533c;
+}
+
+/* ===============================
+   FORM STYLES
+================================ */
+
+/* Form labels */
+.form-label {
+  font-weight: bold;
+}
+
+/* ===============================
+   TABLE STYLES
+================================ */
+
+/* Table structure */
+table {
+  margin-top: 20px;
+  background-color: white;
+  width: 100%; /* Make table full width */
+  border-collapse: collapse;
+}
+
+/* Table header */
+thead {
+  background-color: #005bb5;
+  color: white;
+}
+
+/* Hover effect on table rows */
+tbody tr {
+  transition: background-color 0.3s ease;
+}
+
+/* Hover state for table rows */
+tbody tr:hover {
+  background-color: #e3f2fd;
+}
+
+/* Table cells alignment */
+.table th,
+.table td {
+  vertical-align: middle;
+  text-align: center;
+  padding: 8px; /* Add padding for better spacing */
+}
+
+/* ===============================
+   CUSTOM TABLE CELL COLORS
+================================ */
+
+/* Each cell in the table can have custom background colors */
+.barcode-cell,
+.name-cell,
+.description-cell,
+.price-cell,
+.quantity-cell,
+.category-cell,
+.action-cell {
+  border: 1px solid #007bff;
+  box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2); /* Subtle shadow */
+  border-radius: 5px; /* Rounded corners */
+}
+
+/* Specific colors for table cells */
+.name-cell {
+  background-color: #ffe0b2; /* Light orange */
+}
+.description-cell {
+  background-color: #fce4ec; /* Light pink */
+}
+.price-cell {
+  background-color: #c8e6c9; /* Light green */
+}
+.quantity-cell {
+  background-color: #ffe0b2; /* Light orange */
+}
+.category-cell {
+  background-color: #fce4ec; /* Light pink */
+}
+.action-cell {
+  background-color: #e3f2fd; /* Light blue */
+}
+
+/* ===============================
+   MEDIA QUERIES (Responsiveness)
+================================ */
+
+/* Responsive styles for smaller screens */
+@media (max-width: 768px) {
+  /* Sidebar collapsed on smaller screens */
+  .sidebar {
+    width: 0;
+  }
+
+  /* Open state for the sidebar */
+  .sidebar.open {
+    width: 250px;
+  }
+
+  /* Navbar toggle button for mobile */
+  .navbar-toggler {
+    display: block;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1100;
+  }
+
+  /* Sidebar toggler hover */
+  .navbar-toggler:hover {
+    background-color: #005bb5;
+  }
+
+  /* Main content when sidebar is collapsed */
+  .main-content {
+    margin-left: 0;
+    padding: 20px;
+  }
+
+  /* Responsive container */
+  .container {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  /* Make table scrollable */
+  .table-responsive {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  /* Adjust table cell font size for small screens */
+  .table th,
+  .table td {
+    font-size: 12px;
+  }
+}
+
+/* ===============================
+   ANIMATIONS (If needed)
+================================ */
+
+/* Example animation (fade-in) */
+@keyframes fadeInBackground {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+body {
+  animation: fadeInBackground 2s ease-in-out; /* Smooth fade-in animation for body */
+}
