@@ -1,0 +1,110 @@
+/* Body and Global Styling */
+body {
+  background-color: #f4f6f9;
+  color: #333;
+}
+
+.sidebar {
+  height: 100vh;
+  width: 250px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #142e47;
+  padding-top: 20px;
+  color: white;
+  z-index: 1000;
+  transition: width 0.3s;
+}
+
+.sidebar-header {
+  margin-bottom: 30px;
+}
+
+.logo {
+  height: 80px;
+  width: 100px;
+}
+
+.sidebar nav a {
+  padding: 15px 30px;
+  text-decoration: none;
+  font-size: 18px;
+  color: white;
+  display: block;
+  transition: 0.3s;
+}
+
+.sidebar nav a:hover,
+.sidebar nav a.active {
+  background-color: #005bb5;
+}
+
+.main-content {
+  margin-left: 250px;
+  padding: 20px;
+  transition: margin-left 0.3s;
+}
+
+.dashboard-header {
+  background-color: #142e47;
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dashboard-header h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.dashboard-header input[type='text'] {
+  border-radius: 20px;
+  padding-left: 20px;
+  border: 1px solid #ffd700;
+  max-width: 300px;
+}
+
+.overview-card {
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.product-table {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Media Queries for Responsive Layout */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100px;
+  }
+
+  .sidebar nav a {
+    padding: 10px 15px;
+    font-size: 14px;
+  }
+
+  .main-content {
+    margin-left: 100px;
+  }
+
+  .navbar-toggler {
+    display: block;
+  }
+
+  .sidebar.open {
+    width: 250px;
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+}
