@@ -50,7 +50,7 @@ function LoginController()
         $password = $_POST['password'];
 
         if (loginUser($username, $password, $conn)) {
-            header("Location: ../views/products/dashboard.html");
+            header("Location: ../views/products/dashboard.php");
             exit();
         }
 

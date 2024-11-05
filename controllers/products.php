@@ -1,18 +1,17 @@
 <?php
-
 include '../config/db.php';
 include_once '../models/product_model.php';
 
-
-# Switch case to start managing views for products
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
     switch ($_POST['action']) {
         case 'create':
-            CreateController(); // navigates to registration page
+            CreateController();
             break;
         case 'update':
+            UpdateController();
             break;
         case 'delete':
+            DeleteController();
             break;
         default:
             echo "Invalid action";
@@ -25,20 +24,63 @@ function CreateController()
 {
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         global $conn;
-        $barcode = $_POST['barcode'];
-        $productname = $_POST['productname'];
-        $description = $_POST['description'];
+
+        // Gather and sanitize inputs
+        $barcode = trim($_POST['barcode']);
+        $productname = trim($_POST['productname']);
+        $description = trim($_POST['description']);
         $price = (float) $_POST['price'];
         $quantity = (int) $_POST['quantity'];
-        $category = $_POST['category'];
+        $category = trim($_POST['category']);
 
-        if (addProduct($barcode, $productname, $description, $price, $quantity, $category, $conn)) {
-            header("../views/products/add_product.html");
+        // Call addProduct in model to handle all database and validation logic
+        $result = addProduct($barcode, $productname, $description, $price, $quantity, $category, $conn);
+
+        // Handle response from model
+        if ($result['success']) {
+            header("Location: ../views/products/dashboard.php");
             exit;
         } else {
-            echo "Product was not added successfully. Please try again";
+            session_start();
+            $_SESSION['errors'] = $result['errors'];
+            header("Location: ../views/products/add_product.php");
+            exit;
         }
-
-        $conn->close();
     }
+}
+
+function UpdateController()
+{
+    global $conn;
+    $barcode = $_POST['barcode'];
+    $productname = $_POST['productname'];
+    $description = $_POST['description'];
+    $price = (float)$_POST['price'];
+    $quantity = (int)$_POST['quantity'];
+    $category = $_POST['category'];
+
+    if (updateProduct($barcode, $productname, $description, $price, $quantity, $category, $conn)) {
+        header("Location: ../views/products/dashboard.php?view=dashboard");
+        exit;
+    } else {
+        echo "Product was not updated successfully. Please try again.";
+    }
+
+    $conn->close();
+}
+
+# Function to delete a product from the database
+function DeleteController()
+{
+    global $conn;
+    $barcode = $_POST['barcode'];
+
+    if (deleteProduct($barcode, $conn)) {
+        header("Location: ../views/products/dashboard.php?view=dashboard");
+        exit;
+    } else {
+        echo "Product was not deleted successfully. Please try again.";
+    }
+
+    $conn->close();
 }

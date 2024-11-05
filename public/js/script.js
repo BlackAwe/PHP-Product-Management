@@ -33,3 +33,50 @@ function confirmDelete(productId) {
     alert('Product with ID ' + productId + ' deleted.');
   }
 }
+
+function filterProducts() {
+  const searchInput = document
+    .getElementById('searchInput')
+    .value.toLowerCase();
+  const selectedCategory = document.getElementById('categoryFilter').value;
+  const rows = document.querySelectorAll('#productTable tr');
+
+  rows.forEach((row) => {
+    const productName = row
+      .querySelector('td:nth-child(2)')
+      .textContent.toLowerCase();
+    const productCategory = row.getAttribute('data-category');
+    const matchesSearch = productName.includes(searchInput);
+    const matchesCategory =
+      !selectedCategory || productCategory === selectedCategory;
+
+    row.style.display = matchesSearch && matchesCategory ? '' : 'none';
+  });
+}
+
+function openEditModal(
+  barcode,
+  productName,
+  description,
+  price,
+  quantity,
+  category
+) {
+  document.getElementById('editBarcode').value = barcode;
+  document.getElementById('editProductName').value = productName;
+  document.getElementById('editDescription').value = description;
+  document.getElementById('editPrice').value = price;
+  document.getElementById('editQuantity').value = quantity;
+  document.getElementById('editCategory').value = category;
+  const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+  editModal.show();
+}
+
+function openDeleteModal(barcode, productname) {
+  document.getElementById('deleteBarcode').value = barcode;
+  document.getElementById('deleteProductName').textContent = productname;
+  const deleteModal = new bootstrap.Modal(
+    document.getElementById('deleteModal')
+  );
+  deleteModal.show();
+}
