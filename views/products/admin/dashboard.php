@@ -1,9 +1,21 @@
 <?php
-include '../../config/db.php';
-include '../../models/product_model.php';
 
-$products = readProduct($conn);
+require_once '../../../config/db.php';
+require_once '../../../models/product_model.php';
+require_once '../../../controllers/products.php';
+
+require_once '../../../middleware/AuthMiddleware.php';
+
+use Middleware\AuthMiddleware;
+use Controllers\ProductController;
+
+// Ensure the user is logged in
+AuthMiddleware::requireLogin();
+
+$productController = new ProductController();
+$products = $productController->list(); // Fetch the list of products
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -14,7 +26,7 @@ $products = readProduct($conn);
   <title>Dashboard - E-Commerce Product Management</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-  <link rel="stylesheet" href="../../public/css/products.css" />
+  <link rel="stylesheet" href="../../../public/css/products.css" />
 </head>
 
 <body>
@@ -24,8 +36,16 @@ $products = readProduct($conn);
       <img src="Logo.jpeg" alt="Logo" height="80" width="100" />
     </div>
     <a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-    <a href="../../views/products/add_product.php"><i class="fas fa-plus"></i> Add Product</a>
-    <a href="../../views/auth/login.html" class="text-danger"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    <a href="add_product.php"><i class="fas fa-plus"></i> Add Product</a>
+    <a href="#">
+      <form action="../../../controllers/auth.php" method="POST">
+        <input type="hidden" name="action" value="logout">
+        <button type="submit" class="sidebar-logout">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </form>
+    </a>
+
   </div>
 
   <!-- Main Content Area -->
@@ -75,9 +95,12 @@ $products = readProduct($conn);
                 <td><?php echo htmlspecialchars($product['quantity']); ?></td>
                 <td><?php echo htmlspecialchars($product['category']); ?></td>
                 <td>
-                  <button class="btn btn-warning btn-sm" onclick="openEditModal('<?php echo $product['barcode']; ?>', '<?php echo $product['productname']; ?>', 
-                  '<?php echo $product['description']; ?>', '<?php echo $product['price']; ?>', '<?php echo $product['quantity']; ?>', '<?php echo $product['category']; ?>')">Edit</button>
-                  <button class="btn btn-danger btn-sm" onclick="openDeleteModal('<?php echo $product['barcode']; ?>', '<?php echo htmlspecialchars($product['productname']); ?>')">Delete</button>
+                  <button class="btn btn-warning btn-sm"
+                    onclick="openEditModal('<?php echo $product['barcode']; ?>', '<?php echo $product['productname']; ?>', 
+                  '<?php echo $product['description']; ?>', '<?php echo $product['price']; ?>', 
+                  '<?php echo $product['quantity']; ?>', '<?php echo $product['category']; ?>')">Edit</button>
+                  <button class="btn btn-danger btn-sm"
+                    onclick="openDeleteModal('<?php echo $product['barcode']; ?>', '<?php echo htmlspecialchars($product['productname']); ?>')">Delete</button>
                 </td>
               </tr>
             <?php endforeach; ?>
@@ -100,7 +123,7 @@ $products = readProduct($conn);
   <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
-        <form action="../../controllers/products.php" method="POST">
+        <form action="../../../controllers/products.php" method="POST">
           <div class="modal-header">
             <h5 class="modal-title" id="editModalLabel">Edit Product</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -147,7 +170,7 @@ $products = readProduct($conn);
   <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
-        <form action="../../controllers/products.php" method="POST">
+        <form action="../../../controllers/products.php" method="POST">
           <div class="modal-header">
             <h5 class="modal-title" id="deleteModalLabel">Delete Product</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -168,7 +191,7 @@ $products = readProduct($conn);
 
 
   <!-- External JavaScript -->
-  <script src="../../public/js/script.js"></script>
+  <script src="../../../public/js/script.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 

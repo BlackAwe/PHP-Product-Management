@@ -1,18 +1,29 @@
 <?php
 
-include '../config/db.php';
-include_once '../models/auth_model.php';
+namespace Controllers;
 
-session_start();
+use Models\AuthModel;
+use Config\Database;
 
-# Switch case to start managing views
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
+// Ensure the necessary files are loaded
+require_once __DIR__ . '/../config/db.php';
+require_once '../models/auth_model.php';
+
+// Main entry point for POST requests
+if (
+    $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])
+) {
+    $authController = new AuthController();
+
     switch ($_POST['action']) {
         case 'register':
-            RegistrationController(); // navigates to registration page
+            $authController->register($_POST);
             break;
         case 'login':
-            LoginController(); // navigates to login page
+            $authController->login($_POST);
+            break;
+        case 'logout':
+            $authController->logout();
             break;
         default:
             echo "Invalid action";
@@ -20,40 +31,64 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
     }
 }
 
-# Function to manage registration in views
-function RegistrationController()
+class AuthController
 {
-    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        global $conn;
-        $firstname = $_POST['firstname'];
-        $lastname = $_POST['lastname'];
-        $username = $_POST['username'];
-        $password = $_POST['password'];
+    private $authModel;
 
-        if (registerUser($firstname, $lastname, $username, $password, $conn)) {
+    public function __construct()
+    {
+        $db = (new Database())->connect();
+        $this->authModel = new AuthModel($db);
+    }
+
+    public function register($data)
+    {
+        if (empty($data['firstname']) || empty($data['lastname']) || empty($data['username']) || empty($data['password'])) {
+            echo "All fields are required.";
+            return;
+        }
+
+        if ($this->authModel->registerUser($data['firstname'], $data['lastname'], $data['username'], $data['password'])) {
             header("Location: ../views/auth/login.html");
             exit();
         } else {
             echo "Registration failed. Please try again.";
         }
-
-        $conn->close();
     }
-}
 
-# Function for controlling the login navigation
-function LoginController()
-{
-    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        global $conn;
-        $username = $_POST['username'];
-        $password = $_POST['password'];
-
-        if (loginUser($username, $password, $conn)) {
-            header("Location: ../views/products/dashboard.php");
-            exit();
+    public function login($data)
+    {
+        if (empty($data['username']) || empty($data['password'])) {
+            echo "Username and password are required.";
+            return;
         }
 
-        $conn->close();
+        $user = $this->authModel->loginUser($data['username'], $data['password']);
+        if ($user) {
+            session_start();
+            $_SESSION['userId'] = $user['userId'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['role'] = $user['role'];
+            $_SESSION['firstname'] = $user['firstname'];
+            $_SESSION['lastname'] = $user['lastname'];
+
+            if ($user['role'] === 'admin') {
+                header("Location: ../views/products/admin/dashboard.php");
+            } else {
+                header("Location: ../views/user/landingpage.php");
+            }
+            exit();
+        } else {
+            echo "Invalid username or password.";
+        }
+    }
+
+    public function logout()
+    {
+        session_start();
+        session_unset();
+        session_destroy();
+        header("Location: ../views/auth/login.html");
+        exit();
     }
 }

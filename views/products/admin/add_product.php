@@ -1,3 +1,12 @@
+<?php
+require_once '../../../middleware/AuthMiddleware.php';
+
+use Middleware\AuthMiddleware;
+
+// Ensure the user is logged in
+AuthMiddleware::requireLogin();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,7 +16,7 @@
   <title>Add Product - ElectroVerse Electronics</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-  <link rel="stylesheet" href="../../public/css/products.css" />
+  <link rel="stylesheet" href="../../../public/css/products.css" />
 </head>
 
 <body>
@@ -16,9 +25,16 @@
     <div class="sidebar-header">
       <img src="Logo.jpeg" alt="Logo" height="80" width="100" />
     </div>
-    <a href="../../views/products/dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+    <a href="../admin/dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
     <a href="#"><i class="fas fa-plus"></i> Add Product</a>
-    <a href="../../views/auth/login.html" class="text-danger"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    <a href="#">
+      <form action="../../../controllers/auth.php" method="POST">
+        <input type="hidden" name="action" value="logout">
+        <button type="submit" class="sidebar-logout">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </form>
+    </a>
   </div>
 
   <!-- Main Content -->
@@ -27,7 +43,6 @@
 
     <!-- Display error messages if any -->
     <?php
-    session_start();
     if (isset($_SESSION['errors']) && !empty($_SESSION['errors'])) {
       echo '<div class="alert alert-danger"><ul>';
       foreach ($_SESSION['errors'] as $error) {
@@ -38,7 +53,7 @@
     }
     ?>
 
-    <form action="../../controllers/products.php" method="post">
+    <form action="../../../controllers/products.php" method="post">
       <input type="hidden" name="action" value="create" />
 
       <div class="mb-3">
@@ -87,7 +102,7 @@
   </button>
 
   <!-- External JavaScript -->
-  <script src="../../public/js/script.js"></script>
+  <script src="../../../public/js/script.js"></script>
 </body>
 
 </html>

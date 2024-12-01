@@ -1,86 +1,95 @@
 <?php
-include '../config/db.php';
-include_once '../models/product_model.php';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
+namespace Controllers;
+
+use Models\ProductModel;
+use Config\Database;
+
+// Ensure the necessary files are loaded '/../config/db.php'
+require_once __DIR__ . '/../config/db.php';
+require_once(dirname(__DIR__) . '../models/product_model.php');
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    $productController = new ProductController();
+
     switch ($_POST['action']) {
         case 'create':
-            CreateController();
+            $productController->create($_POST);
             break;
+
         case 'update':
-            UpdateController();
+            // Ensure the barcode exists in the POST data
+            if (isset($_POST['barcode'])) {
+                $barcode = $_POST['barcode'];
+                $productController->update($barcode, $_POST);
+            } else {
+                echo "Barcode is required for updating a product.";
+            }
             break;
+
         case 'delete':
-            DeleteController();
+            // Ensure the barcode exists in the POST data
+            if (isset($_POST['barcode'])) {
+                $barcode = $_POST['barcode'];
+                $productController->delete($barcode);
+            } else {
+                echo "Barcode is required for deleting a product.";
+            }
             break;
+
         default:
             echo "Invalid action";
             break;
     }
 }
 
-# Function to add the products to the views from the database
-function CreateController()
+
+class ProductController
 {
-    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        global $conn;
+    private $productModel;
 
-        // Gather and sanitize inputs
-        $barcode = trim($_POST['barcode']);
-        $productname = trim($_POST['productname']);
-        $description = trim($_POST['description']);
-        $price = (float) $_POST['price'];
-        $quantity = (int) $_POST['quantity'];
-        $category = trim($_POST['category']);
+    public function __construct()
+    {
+        $db = (new Database())->connect();
+        $this->productModel = new ProductModel($db);
+    }
 
-        // Call addProduct in model to handle all database and validation logic
-        $result = addProduct($barcode, $productname, $description, $price, $quantity, $category, $conn);
-
-        // Handle response from model
+    public function create($data)
+    {
+        $result = $this->productModel->addProduct($data);
         if ($result['success']) {
-            header("Location: ../views/products/dashboard.php");
-            exit;
+            header("Location: ../views/products/admin/dashboard.php");
+            exit();
         } else {
             session_start();
             $_SESSION['errors'] = $result['errors'];
-            header("Location: ../views/products/add_product.php");
-            exit;
+            header("Location: ../views/products/admin/add_product.php");
+            exit();
         }
     }
-}
 
-function UpdateController()
-{
-    global $conn;
-    $barcode = $_POST['barcode'];
-    $productname = $_POST['productname'];
-    $description = $_POST['description'];
-    $price = (float)$_POST['price'];
-    $quantity = (int)$_POST['quantity'];
-    $category = $_POST['category'];
-
-    if (updateProduct($barcode, $productname, $description, $price, $quantity, $category, $conn)) {
-        header("Location: ../views/products/dashboard.php?view=dashboard");
-        exit;
-    } else {
-        echo "Product was not updated successfully. Please try again.";
+    public function update($barcode, $data)
+    {
+        if ($this->productModel->updateProduct($barcode, $data)) {
+            header("Location: ../views/products/admin/dashboard.php");
+            exit();
+        } else {
+            echo "Failed to update product.";
+        }
     }
 
-    $conn->close();
-}
-
-# Function to delete a product from the database
-function DeleteController()
-{
-    global $conn;
-    $barcode = $_POST['barcode'];
-
-    if (deleteProduct($barcode, $conn)) {
-        header("Location: ../views/products/dashboard.php?view=dashboard");
-        exit;
-    } else {
-        echo "Product was not deleted successfully. Please try again.";
+    public function delete($barcode)
+    {
+        if ($this->productModel->deleteProduct($barcode)) {
+            header("Location: ../views/products/admin/dashboard.php");
+            exit();
+        } else {
+            echo "Failed to delete product.";
+        }
     }
 
-    $conn->close();
+    public function list()
+    {
+        return $this->productModel->readProducts();
+    }
 }
