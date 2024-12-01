@@ -4,36 +4,7 @@ function toggleSidebar() {
   sidebar.classList.toggle('open');
 }
 
-// Function to filter products based on search input
-function filterProducts() {
-  const input = document.getElementById('searchInput');
-  const filter = input.value.toLowerCase();
-  const table = document.getElementById('productTable');
-  const rows = table.getElementsByTagName('tr');
-
-  // Loop through all table rows and hide those that don't match the search query
-  for (let i = 0; i < rows.length; i++) {
-    const td = rows[i].getElementsByTagName('td');
-    if (td) {
-      const description = td[2].textContent || td[2].innerText;
-      if (description.toLowerCase().indexOf(filter) > -1) {
-        rows[i].style.display = '';
-      } else {
-        rows[i].style.display = 'none';
-      }
-    }
-  }
-}
-
-// Function to confirm deletion of a product
-function confirmDelete(productId) {
-  const confirmation = confirm('Are you sure you want to delete this product?');
-  if (confirmation) {
-    // Implement product deletion logic here (e.g., make a backend API call)
-    alert('Product with ID ' + productId + ' deleted.');
-  }
-}
-
+// Function to filter products based on search input and category
 function filterProducts() {
   const searchInput = document
     .getElementById('searchInput')
@@ -49,11 +20,28 @@ function filterProducts() {
     const matchesSearch = productName.includes(searchInput);
     const matchesCategory =
       !selectedCategory || productCategory === selectedCategory;
-
     row.style.display = matchesSearch && matchesCategory ? '' : 'none';
   });
 }
 
+// Add event listeners
+document
+  .getElementById('searchInput')
+  .addEventListener('keyup', filterProducts);
+document
+  .getElementById('categoryFilter')
+  .addEventListener('change', filterProducts);
+
+// Function to confirm deletion of a product
+function confirmDelete(barcode) {
+  const confirmation = confirm('Are you sure you want to delete this product?');
+  if (confirmation) {
+    document.getElementById('deleteBarcode').value = barcode;
+    document.getElementById('deleteModal').querySelector('form').submit();
+  }
+}
+
+// Function to open the Edit Product modal with prefilled data
 function openEditModal(
   barcode,
   productName,
@@ -72,9 +60,10 @@ function openEditModal(
   editModal.show();
 }
 
-function openDeleteModal(barcode, productname) {
+// Function to open the Delete Product modal with product details
+function openDeleteModal(barcode, productName) {
   document.getElementById('deleteBarcode').value = barcode;
-  document.getElementById('deleteProductName').textContent = productname;
+  document.getElementById('deleteProductName').textContent = productName;
   const deleteModal = new bootstrap.Modal(
     document.getElementById('deleteModal')
   );
