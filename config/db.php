@@ -1,13 +1,27 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "productdb";
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+namespace Config;
 
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+use PDO;
+use PDOException;
+
+class Database
+{
+    private $host = 'localhost';
+    private $db_name = 'productdb';
+    private $username = 'root';
+    private $password = '';
+    private $conn;
+
+    public function connect()
+    {
+        $this->conn = null;
+        try {
+            $this->conn = new PDO("mysql:host={$this->host};dbname={$this->db_name}", $this->username, $this->password);
+            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch (PDOException $e) {
+            die("Database connection error: " . $e->getMessage());
+        }
+        return $this->conn;
+    }
 }
