@@ -3,7 +3,6 @@
 require_once '../../../config/db.php';
 require_once '../../../models/product_model.php';
 require_once '../../../controllers/products.php';
-
 require_once '../../../middleware/AuthMiddleware.php';
 
 use Middleware\AuthMiddleware;

@@ -31,6 +31,46 @@ document
 document
   .getElementById('categoryFilter')
   .addEventListener('change', filterProducts);
+document
+.addEventListener('DOMContentLoaded', () => {
+    const checkoutButton = document.getElementById('checkoutButton');
+    const confirmCheckoutButton = document.getElementById('confirmCheckout');
+
+    checkoutButton.addEventListener('click', function () {
+        const checkoutModal = new bootstrap.Modal(document.getElementById('checkoutModal'));
+        checkoutModal.show();
+    });
+
+    confirmCheckoutButton.addEventListener('click', function () {
+        const shippingDetails = document.getElementById('shippingDetails').value;
+        const paymentMethod = document.getElementById('paymentMethod').value;
+
+        if (!shippingDetails || !paymentMethod) {
+            alert('Please fill out all required fields.');
+            return;
+        }
+        fetch('../controllers/carts.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'checkout',
+                shippingDetails,
+                paymentMethod,
+            }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success) {
+                    alert('Order placed successfully!');
+                    window.location.href = 'cart.php';
+                } else {
+                    alert('Error during checkout: ' + data.message);
+                }
+            })
+            .catch((error) => console.error('Error:', error));
+    });
+});
+
 
 // Function to confirm deletion of a product
 function confirmDelete(barcode) {
@@ -68,4 +108,83 @@ function openDeleteModal(barcode, productName) {
     document.getElementById('deleteModal')
   );
   deleteModal.show();
+}
+
+// Function to show the checkout modal
+function showCheckoutModal() {
+  const modal = new bootstrap.Modal(document.getElementById('checkoutModal'));
+  modal.show();
+}
+
+// Handle the checkout process
+document.getElementById('confirmCheckout').addEventListener('click', function () {
+  const shippingDetails = document.getElementById('shippingDetails').value;
+  const paymentMethod = document.getElementById('paymentMethod').value;
+
+  if (!shippingDetails || !paymentMethod) {
+      alert('Please provide all required details.');
+      return;
+  }
+
+  fetch('../controllers/carts.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+          action: 'checkout',
+          shippingDetails: shippingDetails,
+          paymentMethod: paymentMethod,
+      }),
+  })
+      .then((response) => response.json())
+      .then((data) => {
+          if (data.success) {
+              alert('Order placed successfully!');
+              location.reload(); // Reload to reflect the cleared cart
+          } else {
+              alert('Failed to place order: ' + data.message);
+          }
+      })
+      .catch((error) => console.error('Error:', error));
+});
+
+
+// Function to fetch cart data and trigger the modal
+function checkout() {
+  fetch('../controllers/carts.php', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: 'action=checkout'
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        showCheckoutModal(data.cartItems); // Display the modal with cart items
+        clearCart(); // Clear the cart after successful checkout
+      } else {
+        alert('Checkout failed: ' + data.message);
+      }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+// Function to clear the cart (both frontend and database)
+function clearCart() {
+  fetch('../controllers/carts.php', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: 'action=clear'
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        window.location.reload(); // Reload the page after clearing the cart
+      } else {
+        console.error('Failed to clear cart:', data.message);
+      }
+    })
+    .catch(error => console.error('Error:', error));
 }
