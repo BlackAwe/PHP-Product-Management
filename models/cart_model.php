@@ -106,4 +106,40 @@ class CartModel
         $stmt->bindParam(':userId', $userId);
         return $stmt->execute();
     }
+
+    // Update product quantity in the user's cart
+    public function updateCartQuantity($productId, $quantity)
+    {
+        try {
+            // Start the session if it's not already started
+            if (session_status() == PHP_SESSION_NONE) {
+                session_start();
+            }
+
+            $userId = $_SESSION['userId']; // Retrieve userId from session
+
+            // Check if the product is already in the cart for this user
+            $sql = "SELECT * FROM cart WHERE productId = :productId AND userId = :userId";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bindParam(':productId', $productId);
+            $stmt->bindParam(':userId', $userId);
+            $stmt->execute();
+
+            if ($stmt->rowCount() > 0) {
+                // If product exists, update the quantity
+                $updateSql = "UPDATE cart SET quantity = :quantity WHERE productId = :productId AND userId = :userId";
+                $updateStmt = $this->conn->prepare($updateSql);
+                $updateStmt->bindParam(':quantity', $quantity);
+                $updateStmt->bindParam(':productId', $productId);
+                $updateStmt->bindParam(':userId', $userId);
+                $updateStmt->execute();
+                return ['success' => true, 'message' => 'Cart updated successfully!'];
+            } else {
+                // If product does not exist in cart, return failure
+                return ['success' => false, 'message' => 'Product not found in your cart.'];
+            }
+        } catch (\Exception $e) {
+            return ['success' => false, 'message' => 'Error: ' . $e->getMessage()];
+        }
+    }
 }
