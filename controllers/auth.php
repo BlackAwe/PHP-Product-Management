@@ -63,15 +63,18 @@ class AuthController
             return;
         }
 
+        // Attempt to authenticate the user
         $user = $this->authModel->loginUser($data['username'], $data['password']);
         if ($user) {
+            // Start the session and store user information
             session_start();
-            $_SESSION['userId'] = $user['userId'];
+            $_SESSION['userId'] = $user['userId'];  // Store user ID
             $_SESSION['username'] = $user['username'];
             $_SESSION['role'] = $user['role'];
             $_SESSION['firstname'] = $user['firstname'];
             $_SESSION['lastname'] = $user['lastname'];
 
+            // Redirect based on user role
             if ($user['role'] === 'admin') {
                 header("Location: ../views/products/admin/dashboard.php");
             } else {
@@ -82,6 +85,7 @@ class AuthController
             echo "Invalid username or password.";
         }
     }
+
 
     public function logout()
     {

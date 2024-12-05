@@ -11,7 +11,6 @@ require_once(dirname(__DIR__) . '../models/cart_model.php');
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $cartController = new CartController();
 
-
     switch ($_POST['action']) {
         case 'add':
             $cartController->add($_POST);
@@ -27,24 +26,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             break;
 
         case 'checkout':
-            // Retrieve form data
             $shippingDetails = $_POST['shippingDetails'] ?? '';
             $paymentMethod = $_POST['paymentMethod'] ?? '';
 
-            // Validate inputs
             if (empty($shippingDetails) || empty($paymentMethod)) {
                 header('Location: ../views/user/checkout.html?error=Please fill out all required fields');
                 exit;
             }
 
-            // Process the checkout
             $result = $cartController->checkout($shippingDetails, $paymentMethod);
 
             if ($result['success']) {
-                // Redirect to a success page or display success message
                 header('Location: ../views/user/checkout.html');
             } else {
-                // Redirect back to checkout with an error message
                 header('Location: ../views/user/checkout.html?error=' . urlencode($result['message']));
             }
             exit;
@@ -100,6 +94,7 @@ class CartController
             exit();
         }
     }
+
     public function list()
     {
         return $this->cartModel->readCart();

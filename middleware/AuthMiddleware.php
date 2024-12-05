@@ -6,7 +6,11 @@ class AuthMiddleware
 {
     public static function requireLogin()
     {
-        session_start();
+        // Start the session only if it is not already started
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
+
         if (!isset($_SESSION['userId']) || !isset($_SESSION['username'])) {
             header("Location: ../../../views/auth/login.html");
             exit();

@@ -17,28 +17,37 @@ class CartModel
     public function addCart($data)
     {
         try {
+            // Start the session if it's not already started
+            if (session_status() == PHP_SESSION_NONE) {
+                session_start();
+            }
+
+            $userId = $_SESSION['userId']; // Retrieve userId from session
             $productId = $data['productId'];
             $quantity = $data['quantity'];
 
-            // Check if the product is already in the cart
-            $sql = "SELECT * FROM cart WHERE productId = :productId";
+            // Check if the product is already in the cart for this user
+            $sql = "SELECT * FROM cart WHERE productId = :productId AND userId = :userId";
             $stmt = $this->conn->prepare($sql);
             $stmt->bindParam(':productId', $productId);
+            $stmt->bindParam(':userId', $userId);
             $stmt->execute();
 
             if ($stmt->rowCount() > 0) {
-                // If product exists in the cart, update the quantity
-                $updateSql = "UPDATE cart SET quantity = quantity + :quantity WHERE productId = :productId";
+                // If product exists in the cart for this user, update the quantity
+                $updateSql = "UPDATE cart SET quantity = quantity + :quantity WHERE productId = :productId AND userId = :userId";
                 $updateStmt = $this->conn->prepare($updateSql);
                 $updateStmt->bindParam(':quantity', $quantity);
                 $updateStmt->bindParam(':productId', $productId);
+                $updateStmt->bindParam(':userId', $userId);
                 $updateStmt->execute();
             } else {
-                // Insert new product into the cart
-                $insertSql = "INSERT INTO cart (productId, quantity) VALUES (:productId, :quantity)";
+                // Insert new product into the cart for this user
+                $insertSql = "INSERT INTO cart (productId, quantity, userId) VALUES (:productId, :quantity, :userId)";
                 $insertStmt = $this->conn->prepare($insertSql);
                 $insertStmt->bindParam(':productId', $productId);
                 $insertStmt->bindParam(':quantity', $quantity);
+                $insertStmt->bindParam(':userId', $userId);
                 $insertStmt->execute();
             }
 
@@ -50,72 +59,51 @@ class CartModel
 
     public function readCart()
     {
+        // Start the session if it's not already started
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $userId = $_SESSION['userId']; // Use userId from session to fetch the user's cart
+
         $sql = "SELECT cart.productId, cart.quantity, products.productname, products.price 
                 FROM cart
-                JOIN products ON cart.productId = products.productId";
-        $stmt = $this->conn->query($sql);
+                JOIN products ON cart.productId = products.productId
+                WHERE cart.userId = :userId";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':userId', $userId);
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function removeCart($cartId)
     {
-        $sql = "DELETE FROM cart WHERE productId = :productId";
+        // Start the session if it's not already started
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $userId = $_SESSION['userId'];
+
+        $sql = "DELETE FROM cart WHERE productId = :productId AND userId = :userId";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':productId', $cartId);
+        $stmt->bindParam(':userId', $userId);
         return $stmt->execute();
     }
 
     public function clearCart()
     {
-        $sql = "DELETE FROM cart";
-        $stmt = $this->conn->prepare($sql);
-        return $stmt->execute();
-    }
-
-
-    public function placeOrder($cartItems, $shippingDetails, $paymentMethod)
-    {
-        try {
-            // Start transaction
-            $this->conn->beginTransaction();
-
-            // Insert into orders table
-            $sql = "INSERT INTO orders (shippingDetails, paymentMethod, orderDate) VALUES (:shippingDetails, :paymentMethod, NOW())";
-            $stmt = $this->conn->prepare($sql);
-            $stmt->bindParam(':shippingDetails', $shippingDetails);
-            $stmt->bindParam(':paymentMethod', $paymentMethod);
-            $stmt->execute();
-
-            $orderId = $this->conn->lastInsertId();
-
-            // Insert order items
-            foreach ($cartItems as $item) {
-                $sql = "INSERT INTO order_items (orderId, productId, quantity, price) VALUES (:orderId, :productId, :quantity, :price)";
-                $stmt = $this->conn->prepare($sql);
-                $stmt->bindParam(':orderId', $orderId);
-                $stmt->bindParam(':productId', $item['productId']);
-                $stmt->bindParam(':quantity', $item['quantity']);
-                $stmt->bindParam(':price', $item['price']);
-                $stmt->execute();
-            }
-
-            // Commit transaction
-            $this->conn->commit();
-
-            return $orderId;
-        } catch (Exception $e) {
-            // Rollback transaction
-            $this->conn->rollBack();
-            return false;
+        // Start the session if it's not already started
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
         }
-    }
 
-    public function updateCartQuantity($productId, $quantity)
-    {
-        $sql = "UPDATE cart SET quantity = :quantity WHERE productId = :productId";
+        $userId = $_SESSION['userId'];
+
+        $sql = "DELETE FROM cart WHERE userId = :userId";
         $stmt = $this->conn->prepare($sql);
-        $stmt->bindParam(':quantity', $quantity, PDO::PARAM_INT);
-        $stmt->bindParam(':productId', $productId, PDO::PARAM_INT);
+        $stmt->bindParam(':userId', $userId);
         return $stmt->execute();
     }
 }
