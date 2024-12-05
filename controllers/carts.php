@@ -102,17 +102,17 @@ class CartController
 
     public function checkout($shippingDetails, $paymentMethod)
     {
-        $cartItems = $this->cartModel->readCart();
+        $result = $this->cartModel->checkout();
 
-        if (empty($cartItems)) {
-            return ['success' => false, 'message' => 'Your cart is empty.'];
-        }
-        if ($this->cartModel->clearCart()) {
-            return ['success' => true, 'message' => 'Checkout successful!'];
+        if ($result['success']) {
+            header("Location: ../views/user/orderconfirmation.php?success=" . urlencode($result['message']));
+            exit();
         } else {
-            return ['success' => false, 'message' => 'Failed to complete checkout.'];
+            header("Location: ../views/user/checkout.php?error=" . urlencode($result['message']));
+            exit();
         }
     }
+
 
     public function clearCart()
     {

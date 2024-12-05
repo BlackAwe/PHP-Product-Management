@@ -187,30 +187,58 @@ class CartModel
             $userId = $_SESSION['userId']; // Retrieve userId from session
 
             // Fetch all products in the cart
-            $sql = "SELECT cart.productId, cart.quantity FROM cart WHERE cart.userId = :userId";
+            $sql = "SELECT cart.productId, cart.quantity, products.productname, products.quantity AS stock 
+                FROM cart
+                JOIN products ON cart.productId = products.productId
+                WHERE cart.userId = :userId";
             $stmt = $this->conn->prepare($sql);
-            $stmt->bindParam(':userId', $userId);
+            $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
             $stmt->execute();
             $cartItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            // Update product stock in the products table
+            if (empty($cartItems)) {
+                return ['success' => false, 'message' => 'Your cart is empty.'];
+            }
+
+            // Begin transaction
+            $this->conn->beginTransaction();
+
+            // Validate stock and update product quantities
             foreach ($cartItems as $item) {
+                $productId = $item['productId'];
+                $cartQuantity = $item['quantity'];
+                $stock = $item['stock'];
+
+                if ($cartQuantity > $stock) {
+                    $this->conn->rollBack();
+                    return [
+                        'success' => false,
+                        'message' => 'Insufficient stock for product: ' . $item['productname']
+                    ];
+                }
+
+                // Subtract the cart quantity from the stock
                 $updateStockSql = "UPDATE products SET quantity = quantity - :quantity WHERE productId = :productId";
                 $updateStockStmt = $this->conn->prepare($updateStockSql);
-                $updateStockStmt->bindParam(':quantity', $item['quantity']);
-                $updateStockStmt->bindParam(':productId', $item['productId']);
+                $updateStockStmt->bindParam(':quantity', $cartQuantity, PDO::PARAM_INT);
+                $updateStockStmt->bindParam(':productId', $productId, PDO::PARAM_INT);
                 $updateStockStmt->execute();
             }
 
             // Clear the cart after checkout
             $clearCartSql = "DELETE FROM cart WHERE userId = :userId";
             $clearCartStmt = $this->conn->prepare($clearCartSql);
-            $clearCartStmt->bindParam(':userId', $userId);
+            $clearCartStmt->bindParam(':userId', $userId, PDO::PARAM_INT);
             $clearCartStmt->execute();
 
+            // Commit transaction
+            $this->conn->commit();
+
             return ['success' => true, 'message' => 'Checkout successful!'];
-        } catch (\Exception $e) {
-            return ['success' => false, 'message' => 'Error: ' . $e->getMessage()];
+        } catch (Exception $e) {
+            // Rollback transaction on error
+            $this->conn->rollBack();
+            return ['success' => false, 'message' => 'Error during checkout: ' . $e->getMessage()];
         }
     }
 }

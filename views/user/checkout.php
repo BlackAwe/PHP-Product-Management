@@ -14,27 +14,28 @@ $conn = $db->connect();
 $cartModel = new CartModel($conn);
 
 // Handle checkout submission
+$feedback = ''; // Feedback message
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'checkout') {
     $shippingDetails = $_POST['shippingDetails'] ?? '';
     $paymentMethod = $_POST['paymentMethod'] ?? '';
 
     // Validate inputs
     if (empty($shippingDetails) || empty($paymentMethod)) {
-        $error = "Please provide all required fields.";
+        $feedback = "Please provide all required fields.";
     } else {
         // Retrieve cart items
         $cartItems = $cartModel->readCart();
 
         if (empty($cartItems)) {
-            $error = "Your cart is empty. Add items to proceed.";
+            $feedback = "Your cart is empty. Add items to proceed.";
         } else {
-            // Clear the cart after processing
-            if ($cartModel->clearCart()) {
-                // Redirect to order confirmation
-                header("Location: landingpage.php");
-                exit;
+            // Process checkout
+            $checkoutResult = $cartModel->checkout();
+            if ($checkoutResult['success']) {
+                $feedback = "Checkout successful! Your order has been placed.";
+                header("Refresh: 3; url=landingpage.php"); // Redirect after 3 seconds
             } else {
-                $error = "Failed to complete checkout. Please try again.";
+                $feedback = $checkoutResult['message'];
             }
         }
     }
@@ -81,9 +82,17 @@ foreach ($cartItems as $item) {
             background: #5f9ad1;
         }
 
-        .error-message {
+        .feedback-message {
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .feedback-success {
+            color: green;
+        }
+
+        .feedback-error {
             color: red;
-            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -92,7 +101,7 @@ foreach ($cartItems as $item) {
     <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #005bb5;">
         <div class="container">
             <a class="navbar-brand" href="landingpage.php">ElectroVerse Electronics</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -120,8 +129,10 @@ foreach ($cartItems as $item) {
 
     <div class="container py-5">
         <h1 class="text-center mb-4">Checkout</h1>
-        <?php if (isset($error)): ?>
-            <p class="text-center error-message"><?php echo $error; ?></p>
+        <?php if (!empty($feedback)): ?>
+            <div class="text-center feedback-message <?php echo strpos($feedback, 'successful') !== false ? 'feedback-success' : 'feedback-error'; ?>">
+                <?php echo $feedback; ?>
+            </div>
         <?php endif; ?>
         <div class="form-section">
             <form method="POST" action="checkout.php">
