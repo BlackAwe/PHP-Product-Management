@@ -1,0 +1,192 @@
+body {
+  background: linear-gradient(to right, #142e47, #005bb5);
+  color: white;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+}
+
+.card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background-color: #ffffff;
+  color: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.card-text {
+  color: #555555;
+}
+
+.container {
+  margin: auto;
+  padding: 20px;
+  max-width: 1200px;
+  width: 90%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 0;
+  border-bottom: 1px solid #ffffff33;
+}
+
+.cart {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.cart a {
+  text-decoration: none;
+  color: #ffffff;
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  transition: color 0.3s ease;
+}
+
+.cart a:hover {
+  color: #fdfdfd;
+}
+
+.cart .quantity {
+  background-color: #005bb5;
+  color: white;
+  border-radius: 50%;
+  padding: 0 8px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary {
+  background-color: #ff6347;
+  border-color: #f0f0f0;
+  color: white;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+  font-weight: bold;
+  padding: 10px 20px;
+  border-radius: 5px;
+}
+
+.btn-primary:hover {
+  background-color: #005bb5;
+  border-color: #e55347;
+}
+
+input[type='number'],
+input[type='text'] {
+  border-radius: 5px;
+  border: 1px solid #cccccc;
+  padding: 5px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+input:focus {
+  border-color: #005bb5;
+  outline: none;
+}
+
+#searchBar {
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid #ffffff99;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  width: 100%;
+}
+
+#searchBar::placeholder {
+  color: #ffffffcc;
+}
+
+#searchBar:focus {
+  background: rgba(255, 255, 255, 0.2);
+  outline: none;
+  border-color: #005bb5;
+  color: white;
+}
+
+.row {
+  margin-top: 20px;
+}
+
+.row .col-md-4 {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  margin-bottom: 20px;
+}
+
+footer {
+  margin-top: auto;
+  padding: 10px 0;
+  text-align: center;
+  background-color: #142e47;
+  color: #ffffff99;
+  font-size: 0.85rem;
+}
+
+footer a {
+  color: #ffffffcc;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+footer a:hover {
+  color: #ffffff;
+}
+
+.nav-item .sidebar-logout {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1rem;
+  padding: 8px 15px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.nav-item .sidebar-logout:hover {
+  background-color: #ffffff33; /* Semi-transparent white for hover */
+  color: #ffffff; /* Brighter white for hover */
+  border-radius: 5px; /* Match other button elements */
+}
+
+.nav-item .sidebar-logout i {
+  margin-right: 5px; /* Add spacing between icon and text */
+  font-size: 1rem;
+}
+
+/* Ensure the entire navbar stays aligned */
+.nav-item .sidebar-logout:focus {
+  outline: none;
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.6); /* Focus effect */
+}
