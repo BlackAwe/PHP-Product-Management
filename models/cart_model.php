@@ -26,6 +26,22 @@ class CartModel
             $productId = $data['productId'];
             $quantity = $data['quantity'];
 
+            // Check the available quantity of the product in the products table
+            $sql = "SELECT quantity FROM products WHERE productId = :productId";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bindParam(':productId', $productId);
+            $stmt->execute();
+            $product = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$product) {
+                return ['success' => false, 'message' => 'Product not found.'];
+            }
+
+            // Check if the quantity in cart does not exceed the available stock
+            if ($quantity > $product['quantity']) {
+                return ['success' => false, 'message' => 'Not enough stock available for this product.'];
+            }
+
             // Check if the product is already in the cart for this user
             $sql = "SELECT * FROM cart WHERE productId = :productId AND userId = :userId";
             $stmt = $this->conn->prepare($sql);
@@ -69,7 +85,7 @@ class CartModel
         $sql = "SELECT cart.productId, cart.quantity, products.productname, products.price 
                 FROM cart
                 JOIN products ON cart.productId = products.productId
-                WHERE cart.userId = :userId";
+                WHERE cart.userId = :userId AND products.quantity > 0"; // Exclude products with zero quantity
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':userId', $userId);
         $stmt->execute();
@@ -118,6 +134,22 @@ class CartModel
 
             $userId = $_SESSION['userId']; // Retrieve userId from session
 
+            // Check the available quantity of the product in the products table
+            $sql = "SELECT quantity FROM products WHERE productId = :productId";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bindParam(':productId', $productId);
+            $stmt->execute();
+            $product = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$product) {
+                return ['success' => false, 'message' => 'Product not found.'];
+            }
+
+            // Check if the quantity in cart does not exceed the available stock
+            if ($quantity > $product['quantity']) {
+                return ['success' => false, 'message' => 'Not enough stock available for this product.'];
+            }
+
             // Check if the product is already in the cart for this user
             $sql = "SELECT * FROM cart WHERE productId = :productId AND userId = :userId";
             $stmt = $this->conn->prepare($sql);
@@ -138,6 +170,45 @@ class CartModel
                 // If product does not exist in cart, return failure
                 return ['success' => false, 'message' => 'Product not found in your cart.'];
             }
+        } catch (\Exception $e) {
+            return ['success' => false, 'message' => 'Error: ' . $e->getMessage()];
+        }
+    }
+
+    // Process checkout and update product stock
+    public function checkout()
+    {
+        try {
+            // Start the session if it's not already started
+            if (session_status() == PHP_SESSION_NONE) {
+                session_start();
+            }
+
+            $userId = $_SESSION['userId']; // Retrieve userId from session
+
+            // Fetch all products in the cart
+            $sql = "SELECT cart.productId, cart.quantity FROM cart WHERE cart.userId = :userId";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bindParam(':userId', $userId);
+            $stmt->execute();
+            $cartItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Update product stock in the products table
+            foreach ($cartItems as $item) {
+                $updateStockSql = "UPDATE products SET quantity = quantity - :quantity WHERE productId = :productId";
+                $updateStockStmt = $this->conn->prepare($updateStockSql);
+                $updateStockStmt->bindParam(':quantity', $item['quantity']);
+                $updateStockStmt->bindParam(':productId', $item['productId']);
+                $updateStockStmt->execute();
+            }
+
+            // Clear the cart after checkout
+            $clearCartSql = "DELETE FROM cart WHERE userId = :userId";
+            $clearCartStmt = $this->conn->prepare($clearCartSql);
+            $clearCartStmt->bindParam(':userId', $userId);
+            $clearCartStmt->execute();
+
+            return ['success' => true, 'message' => 'Checkout successful!'];
         } catch (\Exception $e) {
             return ['success' => false, 'message' => 'Error: ' . $e->getMessage()];
         }

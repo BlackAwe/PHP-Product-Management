@@ -72,12 +72,12 @@ class CartController
         $result = $this->cartModel->addCart($data);
 
         if ($result['success']) {
-            header("Location: ../views/user/landingpage.php");
+            header("Location: ../user/landingpage.php");
             exit();
         } else {
             session_start();
             $_SESSION['errors'] = $result['errors'];
-            header("Location: ../views/user/landingpage.php");
+            header("Location: ../user/landingpage.php");
             exit();
         }
     }

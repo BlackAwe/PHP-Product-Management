@@ -1,6 +1,4 @@
 <?php
-// landingpage.php
-
 require_once '../../middleware/AuthMiddleware.php';
 require_once '../../config/db.php';
 require_once '../../models/product_model.php';
@@ -16,14 +14,26 @@ AuthMiddleware::requireLogin();
 $db = new \Config\Database();
 $conn = $db->connect();
 
-// Fetch all products
-$sql = "SELECT * FROM products";
+// Fetch all products (exclude products with 0 quantity)
+$sql = "SELECT * FROM products WHERE quantity > 0";
 $stmt = $conn->query($sql);
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Instantiate the CartController
 $cartController = new CartController();
 $cartItems = $cartController->list(); // List cart items
+
+// Check if cart is being updated
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['productId']) && isset($_POST['quantity'])) {
+    $productId = $_POST['productId'];
+    $quantity = $_POST['quantity'];
+
+    // Add product to cart
+    $addCartResponse = $cartController->add($productId, $quantity);
+
+    // Show success or error message
+    $message = $addCartResponse['message'];
+}
 ?>
 
 <!DOCTYPE html>
@@ -84,6 +94,11 @@ $cartItems = $cartController->list(); // List cart items
                 <input type="text" id="searchBar" class="form-control" placeholder="Search Products..." onkeyup="filterProducts()">
             </div>
         </div>
+
+        <?php if (isset($message)): ?>
+            <div class="alert alert-info"><?php echo $message; ?></div>
+        <?php endif; ?>
+
         <div class="row" id="productContainer">
             <?php foreach ($products as $product): ?>
                 <div class="col-md-4 product-item" data-name="<?php echo htmlspecialchars($product['productname']); ?>">
@@ -92,12 +107,16 @@ $cartItems = $cartController->list(); // List cart items
                             <h5 class="card-title"><?php echo htmlspecialchars($product['productname']); ?></h5>
                             <p class="card-text"><?php echo htmlspecialchars($product['description']); ?></p>
                             <p>Price: $<?php echo number_format($product['price'], 2); ?></p>
-                            <form method="POST" action="../../controllers/carts.php">
+                            <p>In Stock: <?php echo $product['quantity']; ?> available</p>
+
+                            <form method="POST" action="landingpage.php">
                                 <input type="hidden" name="productId" value="<?php echo $product['productId']; ?>">
                                 <input type="hidden" name="action" value="add">
                                 <label>Quantity:</label>
-                                <input type="number" name="quantity" value="1" min="1">
-                                <button type="submit" class="btn btn-primary">Add to Cart</button>
+                                <input type="number" name="quantity" value="1" min="1" max="<?php echo $product['quantity']; ?>">
+                                <button type="submit" class="btn btn-primary" <?php echo $product['quantity'] <= 0 ? 'disabled' : ''; ?>>
+                                    Add to Cart
+                                </button>
                             </form>
                         </div>
                     </div>
