@@ -104,7 +104,14 @@ foreach ($cartItems as $item) {
                         <a class="nav-link" href="cart.php">Cart</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="checkout.php">Checkout</a>
+                        <a class="nav-link" href="#">
+                            <form action="../../controllers/auth.php" method="POST">
+                                <input type="hidden" name="action" value="logout">
+                                <button type="submit" class="sidebar-logout">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </button>
+                            </form>
+                        </a>
                     </li>
                 </ul>
             </div>

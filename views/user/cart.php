@@ -46,6 +46,7 @@ foreach ($cartItems as $item) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Cart - ElectroVerse Electronics</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../public/css/user.css">
     <style>
         body {
             background: linear-gradient(to right, #142e47, #005bb5);
@@ -124,7 +125,14 @@ foreach ($cartItems as $item) {
                         <a class="nav-link active" href="cart.php">Cart</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="checkout.php">Checkout</a>
+                        <a class="nav-link" href="#">
+                            <form action="../../controllers/auth.php" method="POST">
+                                <input type="hidden" name="action" value="logout">
+                                <button type="submit" class="sidebar-logout">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </button>
+                            </form>
+                        </a>
                     </li>
                 </ul>
             </div>
