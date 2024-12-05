@@ -12,7 +12,7 @@ class AuthMiddleware
         }
 
         if (!isset($_SESSION['userId']) || !isset($_SESSION['username'])) {
-            header("Location: ../../../views/auth/login.html");
+            header("Location: ../../../views/auth/login.php");
             exit();
         }
     }

@@ -13,18 +13,22 @@ class AuthModel
         $this->conn = $db;
     }
 
-    public function registerUser($firstname, $lastname, $username, $password)
+    public function registerUser($firstname, $lastname, $username, $password, $email, $contactInformation)
     {
+        // Hash the password for security
         $hashed_password = password_hash(trim($password), PASSWORD_DEFAULT);
-        $sql = "INSERT INTO users (firstname, lastname, username, password, role) 
-                VALUES (:firstname, :lastname, :username, :password, 'user')"; // Default role is 'user'
+
+        $sql = "INSERT INTO users (firstname, lastname, username, password, email, contact_information, role) 
+                VALUES (:firstname, :lastname, :username, :password, :email, :contact_information, 'user')"; // Default role is 'user'
         $stmt = $this->conn->prepare($sql);
 
         return $stmt->execute([
             ':firstname' => $firstname,
             ':lastname' => $lastname,
             ':username' => $username,
-            ':password' => $hashed_password
+            ':password' => $hashed_password,
+            ':email' => $email,
+            ':contact_information' => $contactInformation
         ]);
     }
 

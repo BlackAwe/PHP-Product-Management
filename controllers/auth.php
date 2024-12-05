@@ -5,7 +5,6 @@ namespace Controllers;
 use Models\AuthModel;
 use Config\Database;
 
-// Ensure the necessary files are loaded
 require_once __DIR__ . '/../config/db.php';
 require_once '../models/auth_model.php';
 
@@ -43,24 +42,50 @@ class AuthController
 
     public function register($data)
     {
-        if (empty($data['firstname']) || empty($data['lastname']) || empty($data['username']) || empty($data['password'])) {
-            echo "All fields are required.";
-            return;
+        // Basic validation
+        if (
+            empty($data['firstname']) || empty($data['lastname']) || empty($data['username']) ||
+            empty($data['password']) || empty($data['email']) || empty($data['contact_information'])
+        ) {
+            header("Location: ../views/auth/register.php?error=" . urlencode("All fields are required."));
+            exit();
         }
 
-        if ($this->authModel->registerUser($data['firstname'], $data['lastname'], $data['username'], $data['password'])) {
-            header("Location: ../views/auth/login.html");
+        // Validate email
+        if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            header("Location: ../views/auth/register.php?error=" . urlencode("Invalid email address."));
+            exit();
+        }
+
+        // Validate password strength
+        if (!preg_match('/^(?=.*[A-Z])(?=.*\d).{8,}$/', $data['password'])) {
+            header("Location: ../views/auth/register.php?error=" . urlencode("Password must be at least 8 characters long, include one uppercase letter, and one number."));
+            exit();
+        }
+
+        // Attempt to register user
+        if ($this->authModel->registerUser(
+            $data['firstname'],
+            $data['lastname'],
+            $data['username'],
+            $data['password'],
+            $data['email'],
+            $data['contact_information']
+        )) {
+            header("Location: ../views/auth/login.php?success=" . urlencode("Registration successful. Please log in."));
             exit();
         } else {
-            echo "Registration failed. Please try again.";
+            header("Location: ../views/auth/register.php?error=" . urlencode("Registration failed. Please try again."));
+            exit();
         }
     }
+
 
     public function login($data)
     {
         if (empty($data['username']) || empty($data['password'])) {
-            echo "Username and password are required.";
-            return;
+            header("Location: ../views/auth/login.php?error=" . urlencode("Username and password are required."));
+            exit();
         }
 
         // Attempt to authenticate the user
@@ -68,7 +93,7 @@ class AuthController
         if ($user) {
             // Start the session and store user information
             session_start();
-            $_SESSION['userId'] = $user['userId'];  // Store user ID
+            $_SESSION['userId'] = $user['userId'];
             $_SESSION['username'] = $user['username'];
             $_SESSION['role'] = $user['role'];
             $_SESSION['firstname'] = $user['firstname'];
@@ -82,9 +107,11 @@ class AuthController
             }
             exit();
         } else {
-            echo "Invalid username or password.";
+            header("Location: ../views/auth/login.php?error=" . urlencode("Invalid username or password."));
+            exit();
         }
     }
+
 
 
     public function logout()
@@ -92,7 +119,7 @@ class AuthController
         session_start();
         session_unset();
         session_destroy();
-        header("Location: ../views/auth/login.html");
+        header("Location: ../views/auth/login.php");
         exit();
     }
 }
